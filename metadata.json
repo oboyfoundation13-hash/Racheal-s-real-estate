@@ -1,0 +1,6 @@
+{
+  "name": "Real Estate Listing & Follow-up Manager",
+  "description": "A comprehensive task management and listing coordinator for real estate agents, featuring automated reminders, AI email drafting, and digital contract signatures with security audits.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

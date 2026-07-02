@@ -1,0 +1,77 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Global default deny safety net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Global Helper Functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAgent(agentId) {
+      return isSignedIn() && request.auth.uid == agentId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // Listings Collection
+    match /listings/{listingId} {
+      allow read: if true; // Publicly readable for listings catalog & shared client reviews
+      allow create: if isSignedIn() && incoming().agentId == request.auth.uid;
+      allow update, delete: if isSignedIn() && existing().agentId == request.auth.uid;
+    }
+
+    // Clients Collection
+    match /clients/{clientId} {
+      allow read, create, update, delete: if isSignedIn() && (
+        (resource == null && incoming().agentId == request.auth.uid) ||
+        (resource != null && existing().agentId == request.auth.uid)
+      );
+    }
+
+    // Tasks Collection
+    match /tasks/{taskId} {
+      allow read, create, update, delete: if isSignedIn() && (
+        (resource == null && incoming().agentId == request.auth.uid) ||
+        (resource != null && existing().agentId == request.auth.uid)
+      );
+    }
+
+    // Communications Collection
+    match /communications/{commId} {
+      allow read, create, update, delete: if isSignedIn() && (
+        (resource == null && incoming().agentId == request.auth.uid) ||
+        (resource != null && existing().agentId == request.auth.uid)
+      );
+    }
+
+    // Documents Collection
+    match /documents/{documentId} {
+      allow read: if true; // Let clients review contracts sent to them
+      allow create: if isSignedIn() && incoming().agentId == request.auth.uid;
+      allow update, delete: if isSignedIn() && existing().agentId == request.auth.uid;
+    }
+
+    // Signature Requests
+    match /signatures/{requestId} {
+      allow read: if true; // Anyone with the unique signature URL can review and sign
+      allow create: if true; // Allow document workflows or agent initialization
+      allow update: if true; // Allow client digital signing updates (e.g. adding signature data and timestamp)
+      allow delete: if isSignedIn(); // Only agents can delete signature requests
+    }
+  }
+}

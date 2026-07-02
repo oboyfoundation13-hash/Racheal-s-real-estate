@@ -1,0 +1,143 @@
+{
+  "entities": {
+    "Listing": {
+      "title": "Listing",
+      "description": "A property listing managed by the real estate agent.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "address": { "type": "string" },
+        "price": { "type": "number" },
+        "status": { "type": "string", "enum": ["Active", "Pending", "Closed"] },
+        "bedrooms": { "type": "number" },
+        "bathrooms": { "type": "number" },
+        "imageUrl": { "type": "string" },
+        "description": { "type": "string" },
+        "keyDates": {
+          "type": "object",
+          "properties": {
+            "listingDate": { "type": "string", "format": "date-time" },
+            "escrowOpenDate": { "type": "string", "format": "date-time" },
+            "inspectionDeadline": { "type": "string", "format": "date-time" },
+            "closingDate": { "type": "string", "format": "date-time" }
+          }
+        },
+        "agentId": { "type": "string" }
+      },
+      "required": ["address", "price", "status", "agentId"]
+    },
+    "Client": {
+      "title": "Client",
+      "description": "A buyer or seller represented by or in contact with the agent.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "email": { "type": "string" },
+        "phone": { "type": "string" },
+        "role": { "type": "string", "enum": ["Buyer", "Seller", "Prospect"] },
+        "status": { "type": "string", "enum": ["Active", "Inactive"] },
+        "agentId": { "type": "string" }
+      },
+      "required": ["name", "email", "role", "agentId"]
+    },
+    "Task": {
+      "title": "Task",
+      "description": "A listing task, reminder, compliance item, or follow-up.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "listingId": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "dueDate": { "type": "string", "format": "date-time" },
+        "completed": { "type": "boolean" },
+        "category": { "type": "string", "enum": ["Listing", "Compliance", "Marketing", "Follow-up"] },
+        "targetClientId": { "type": "string" },
+        "agentId": { "type": "string" },
+        "automated": { "type": "boolean" }
+      },
+      "required": ["title", "dueDate", "completed", "category", "agentId"]
+    },
+    "Communication": {
+      "title": "Communication",
+      "description": "A logged email draft, sent email, or phone follow-up log.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "clientId": { "type": "string" },
+        "type": { "type": "string", "enum": ["Email", "Phone", "In Person"] },
+        "subject": { "type": "string" },
+        "body": { "type": "string" },
+        "sentAt": { "type": "string", "format": "date-time" },
+        "status": { "type": "string", "enum": ["Draft", "Sent", "Logged"] },
+        "agentId": { "type": "string" }
+      },
+      "required": ["clientId", "type", "body", "sentAt", "status", "agentId"]
+    },
+    "Document": {
+      "title": "Document",
+      "description": "Contracts, disclosures, and legal forms stored for a listing.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "type": { "type": "string", "enum": ["Contract", "Disclosure", "Form", "Addendum"] },
+        "listingId": { "type": "string" },
+        "uploadedAt": { "type": "string", "format": "date-time" },
+        "size": { "type": "string" },
+        "status": { "type": "string", "enum": ["Draft", "Sent_For_Signature", "Completed"] },
+        "agentId": { "type": "string" },
+        "contentUrl": { "type": "string" },
+        "textContent": { "type": "string" }
+      },
+      "required": ["name", "type", "listingId", "status", "agentId"]
+    },
+    "SignatureRequest": {
+      "title": "SignatureRequest",
+      "description": "A digital signature workflow for an uploaded contract.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "documentId": { "type": "string" },
+        "listingId": { "type": "string" },
+        "signerName": { "type": "string" },
+        "signerEmail": { "type": "string" },
+        "signerRole": { "type": "string" },
+        "status": { "type": "string", "enum": ["Pending", "Signed"] },
+        "requestedAt": { "type": "string", "format": "date-time" },
+        "signedAt": { "type": "string", "format": "date-time" },
+        "signatureData": { "type": "string" },
+        "signerIp": { "type": "string" },
+        "certificateId": { "type": "string" }
+      },
+      "required": ["documentId", "signerName", "signerEmail", "status", "requestedAt"]
+    }
+  },
+  "firestore": {
+    "/listings/{listingId}": {
+      "schema": "Listing",
+      "description": "Real estate properties under management."
+    },
+    "/clients/{clientId}": {
+      "schema": "Client",
+      "description": "Clients represented by agents."
+    },
+    "/tasks/{taskId}": {
+      "schema": "Task",
+      "description": "Task management items, alerts, and dates."
+    },
+    "/communications/{commId}": {
+      "schema": "Communication",
+      "description": "Communication archives and email tracking logs."
+    },
+    "/documents/{documentId}": {
+      "schema": "Document",
+      "description": "Listing contracts and digital files."
+    },
+    "/signatures/{requestId}": {
+      "schema": "SignatureRequest",
+      "description": "Workflows for legally signing documents."
+    }
+  }
+}
